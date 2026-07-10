@@ -26,8 +26,12 @@ def translate_selection(config: Config, translator) -> None:
     rect = selector.select_region()
     if rect is None:
         return
-    image = capture.grab(rect)
-    english = ocr.extract_text(image)
+    try:
+        image = capture.grab(rect)
+        english = ocr.extract_text(image)
+    except Exception:
+        overlay.show(ERROR_MSG, rect, config)
+        return
     if not english:
         overlay.show(NO_TEXT_MSG, rect, config)
         return
@@ -42,6 +46,7 @@ def translate_selection(config: Config, translator) -> None:
 def run() -> None:
     load_dotenv()
     config = load_config(os.environ)
+    ocr.configure_tesseract(config.tesseract_cmd or None)
     check_tesseract()
     translator = translate.make_translator(config.deepl_api_key)
 

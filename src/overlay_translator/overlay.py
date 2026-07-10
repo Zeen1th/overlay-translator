@@ -27,7 +27,6 @@ def show(text: str, rect: Rect, config: Config) -> None:
     label.pack(padx=1, pady=1)
 
     win.update_idletasks()
-    bw = win.winfo_reqwidth()
     bh = win.winfo_reqheight()
 
     x = rect.x
