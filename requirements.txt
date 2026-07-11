@@ -4,7 +4,7 @@ pytesseract==0.3.13
 Pillow==10.4.0
 deep-translator==1.11.4
 translators==5.9.2
-deepl==1.18.0
+requests==2.33.0
 arabic-reshaper==3.0.0
 python-bidi==0.4.2
 customtkinter==6.0.0

@@ -41,19 +41,12 @@ class SettingsTab:
                                               command=self._on_engine)
         self._engine.set(s.engine)
         self._engine.pack(anchor="w", padx=12, pady=4)
-
-        ctk.CTkLabel(parent, text="DeepL API key (only used by the DeepL engine)",
-                     font=("Segoe UI", 12)).pack(anchor="w", padx=12, pady=(8, 2))
-        keyrow = ctk.CTkFrame(parent, fg_color="transparent")
-        keyrow.pack(fill="x", padx=12)
-        self._key_entry = ctk.CTkEntry(
-            keyrow, width=300,
-            placeholder_text="paste your free DeepL API key")
-        if s.deepl_api_key:
-            self._key_entry.insert(0, s.deepl_api_key)
-        self._key_entry.pack(side="left")
-        ctk.CTkButton(keyrow, text="Save key", width=80,
-                      command=self._save_key).pack(side="left", padx=6)
+        ctk.CTkLabel(
+            parent,
+            text="Google/Bing: keyless & reliable. DeepL: best quality but its "
+                 "free endpoint can be rate-limited on some networks.",
+            font=("Segoe UI", 11), text_color="#888888",
+            wraplength=480, justify="left").pack(anchor="w", padx=12, pady=(2, 0))
 
         ctk.CTkLabel(parent, text="Bubble font size",
                      font=("Segoe UI", 13, "bold")).pack(anchor="w", padx=12,
@@ -107,10 +100,6 @@ class SettingsTab:
 
     def _on_engine(self, value):
         self._app.settings.engine = value
-        self._app.apply_settings()
-
-    def _save_key(self):
-        self._app.settings.deepl_api_key = self._key_entry.get().strip()
         self._app.apply_settings()
 
     def _on_font(self, value):

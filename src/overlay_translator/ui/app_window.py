@@ -11,7 +11,7 @@ from .history_tab import HistoryTab
 from .settings_tab import SettingsTab
 
 NO_TEXT_MSG = "No text found"
-ERROR_MSG = "Translation failed — check your connection (or your DeepL key in Settings)."
+ERROR_MSG = "Translation failed — the engine may be rate-limited or offline. Try again, or switch engine in Settings."
 
 
 class AppWindow(ctk.CTk):
@@ -27,7 +27,7 @@ class AppWindow(ctk.CTk):
         self.geometry("560x520")
         ctk.set_appearance_mode(self.settings.theme)
 
-        self._build_engine()
+        self.engine = translate.make_engine(self.settings.engine)
         self.hotkey_manager = HotkeyManager(
             lambda: self._queue.put(("translate",))
         )
@@ -44,18 +44,6 @@ class AppWindow(ctk.CTk):
         self.after(50, self._poll)
 
     # ---- startup helpers ------------------------------------------------
-    def _build_engine(self) -> None:
-        """Build the translation engine; on failure (e.g. DeepL with no key)
-        keep engine=None and remember the reason to show the user."""
-        try:
-            self.engine = translate.make_engine(
-                self.settings.engine, self.settings.deepl_api_key
-            )
-            self.engine_error = None
-        except translate.TranslationError as exc:
-            self.engine = None
-            self.engine_error = str(exc)
-
     def _check_tesseract(self) -> bool:
         ocr.configure_tesseract(None)
         try:
@@ -114,7 +102,7 @@ class AppWindow(ctk.CTk):
 
     def apply_settings(self):
         ctk.set_appearance_mode(self.settings.theme)
-        self._build_engine()
+        self.engine = translate.make_engine(self.settings.engine)
         self.hotkey_manager.register(self.settings.hotkey)
         self.save_settings()
         self.home_tab.refresh()
@@ -127,10 +115,6 @@ class AppWindow(ctk.CTk):
         try:
             rect = selector.select_region(self)
             if rect is None:
-                return
-            if self.engine is None:
-                overlay.show(self.engine_error or ERROR_MSG, rect,
-                             self.settings, self)
                 return
             try:
                 image = capture.grab(rect)
