@@ -18,14 +18,16 @@ No account or API key needed.
 
 ## The app
 
-- **Home** — status, current hotkey/engine, and a "Translate now" button.
-- **History** — past translations (source → Arabic + time); copy, delete, clear.
-- **Settings** — record a new hotkey, set the auto-hide timer (or turn it off),
-  pick the engine (Google/Bing/DeepL), set the bubble font size, and
-  light/dark theme.
+A native window (creamy-beige light / warm espresso dark) with three sections:
 
-The app lives in the **system tray**: closing the window hides it there; the
-hotkey keeps working; **Quit** from the tray menu exits.
+- **Home** — status, current hotkey/engine, and a "Translate now" button.
+- **History** — past translations (source → Arabic + time); copy, delete, clear; updates live.
+- **Settings** — record a new hotkey, auto-hide timer, engine (Google/Bing/DeepL),
+  bubble font size, and light/dark theme.
+
+The UI is built with HTMX + Flask rendered in a pywebview window. The app lives in
+the system tray: closing the window hides it there; the hotkey keeps working;
+**Quit** from the tray menu exits.
 
 ## Usage
 
