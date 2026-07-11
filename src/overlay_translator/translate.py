@@ -1,12 +1,18 @@
-"""Keyless English->Arabic translation engines.
+"""English->Arabic translation engines.
 
-All three engines use free public web endpoints — no API key. Selected by
-name via make_engine(). Every engine exposes translate(text) -> str.
+- google (keyless): Google's free web endpoint via deep-translator.
+- bing   (keyless): Bing's free web endpoint via translators.
+- deepl  (API key): the official DeepL API. Best Arabic quality and reliable,
+  but requires a free API key (https://www.deepl.com/pro-api). The keyless
+  DeepL web endpoint is aggressively rate-limited (HTTP 429) and effectively
+  unusable, so DeepL here goes through the official API.
+
+Every engine exposes translate(text) -> str; build one with make_engine(name).
 """
 
 
 class TranslationError(Exception):
-    """Raised when a translation call fails (network, rate-limit, etc.)."""
+    """Raised when a translation call fails (network, rate-limit, bad key)."""
 
 
 class GoogleEngine:
@@ -20,16 +26,6 @@ class GoogleEngine:
         return self._t.translate(text)
 
 
-class DeeplEngine:
-    """Keyless DeepL via the `translators` free web endpoint (can rate-limit)."""
-
-    def translate(self, text: str) -> str:
-        import translators as ts
-        return ts.translate_text(
-            text, translator="deepl", from_language="en", to_language="ar"
-        )
-
-
 class BingEngine:
     """Keyless Bing (Microsoft) via the `translators` free web endpoint."""
 
@@ -40,15 +36,37 @@ class BingEngine:
         )
 
 
-_ENGINES = {"google": GoogleEngine, "deepl": DeeplEngine, "bing": BingEngine}
+class DeeplEngine:
+    """Official DeepL API (free tier). Requires an API key."""
+
+    def __init__(self, api_key: str) -> None:
+        import deepl
+        self._t = deepl.Translator(api_key)
+
+    def translate(self, text: str) -> str:
+        result = self._t.translate_text(
+            text, source_lang="EN", target_lang="AR"
+        )
+        return result.text
 
 
-def make_engine(name: str) -> object:
-    """Build the engine named by `name` ('google'|'deepl'|'bing')."""
-    try:
-        return _ENGINES[name]()
-    except KeyError:
-        raise TranslationError(f"Unknown translation engine: {name!r}")
+def make_engine(name: str, api_key: str = "") -> object:
+    """Build the engine named by `name` ('google'|'bing'|'deepl').
+
+    'deepl' requires a non-empty `api_key`; otherwise a TranslationError with a
+    clear, user-facing message is raised.
+    """
+    if name == "google":
+        return GoogleEngine()
+    if name == "bing":
+        return BingEngine()
+    if name == "deepl":
+        if not (api_key or "").strip():
+            raise TranslationError(
+                "DeepL needs a free API key — add it in Settings."
+            )
+        return DeeplEngine(api_key)
+    raise TranslationError(f"Unknown translation engine: {name!r}")
 
 
 def to_arabic(text: str, engine) -> str:
@@ -57,5 +75,5 @@ def to_arabic(text: str, engine) -> str:
         return ""
     try:
         return engine.translate(text)
-    except Exception as exc:
+    except Exception as exc:  # engines raise several exception types
         raise TranslationError(str(exc)) from exc

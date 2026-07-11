@@ -21,15 +21,27 @@ def test_returns_translation():
 
 def test_wraps_errors():
     engine = MagicMock()
-    engine.translate.side_effect = RuntimeError("429")
+    engine.translate.side_effect = RuntimeError("boom")
     with pytest.raises(TranslationError):
         to_arabic("Hello", engine)
 
 
-def test_make_engine_selects_type():
+def test_make_engine_keyless_types():
     assert isinstance(make_engine("google"), GoogleEngine)
-    assert isinstance(make_engine("deepl"), DeeplEngine)
     assert isinstance(make_engine("bing"), BingEngine)
+
+
+def test_make_engine_deepl_needs_key():
+    # No key -> a clear error, not a crash
+    with pytest.raises(TranslationError):
+        make_engine("deepl")
+    with pytest.raises(TranslationError):
+        make_engine("deepl", "   ")
+
+
+def test_make_engine_deepl_with_key():
+    engine = make_engine("deepl", "dummy-key-1234")
+    assert isinstance(engine, DeeplEngine)
 
 
 def test_make_engine_unknown_raises():
