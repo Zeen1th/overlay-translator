@@ -1,4 +1,5 @@
 import json
+import os
 from dataclasses import asdict, dataclass
 
 MAX_ENTRIES = 200
@@ -35,9 +36,11 @@ class HistoryStore:
             return []
 
     def _save(self) -> None:
-        with open(self._path, "w", encoding="utf-8") as fh:
+        tmp = self._path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as fh:
             json.dump([asdict(e) for e in self._entries], fh,
                       indent=2, ensure_ascii=False)
+        os.replace(tmp, self._path)
 
     def entries(self) -> list[HistoryEntry]:
         return list(self._entries)

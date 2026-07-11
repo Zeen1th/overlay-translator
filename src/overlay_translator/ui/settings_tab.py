@@ -64,6 +64,7 @@ class SettingsTab:
     def refresh(self):
         self._hotkey_label.configure(text=self._app.settings.hotkey)
         self._auto_value.configure(text=self._auto_text())
+        self._record_btn.configure(text="Record shortcut", state="normal")
 
     # ---- handlers -------------------------------------------------------
     def _record(self):
@@ -73,9 +74,6 @@ class SettingsTab:
             import keyboard
             combo = keyboard.read_hotkey(suppress=False)
             self._app._queue.put(("hotkey_recorded", combo))
-            # re-enable on the main thread
-            self._app.after(0, lambda: self._record_btn.configure(
-                text="Record shortcut", state="normal"))
 
         threading.Thread(target=worker, daemon=True).start()
 

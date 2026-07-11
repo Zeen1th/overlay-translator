@@ -21,6 +21,7 @@ class AppWindow(ctk.CTk):
         self._settings_path = settings_path
         self.history = history
         self._queue = request_queue
+        self._busy = False
 
         self.title("OverlayTranslator")
         self.geometry("560x520")
@@ -108,24 +109,30 @@ class AppWindow(ctk.CTk):
 
     # ---- the pipeline (main thread) ------------------------------------
     def run_translation_cycle(self):
-        rect = selector.select_region(self)
-        if rect is None:
+        if self._busy:
             return
+        self._busy = True
         try:
-            image = capture.grab(rect)
-            english = ocr.extract_text(image)
-        except Exception:
-            overlay.show(ERROR_MSG, rect, self.settings, self)
-            return
-        if not english:
-            overlay.show(NO_TEXT_MSG, rect, self.settings, self)
-            return
-        try:
-            ar = translate.to_arabic(english, self.engine)
-        except translate.TranslationError:
-            overlay.show(ERROR_MSG, rect, self.settings, self)
-            return
-        overlay.show(arabic.shape_for_display(ar), rect, self.settings, self)
-        self.history.add(english, ar,
-                         datetime.now().isoformat(timespec="seconds"))
-        self.history_tab.refresh()
+            rect = selector.select_region(self)
+            if rect is None:
+                return
+            try:
+                image = capture.grab(rect)
+                english = ocr.extract_text(image)
+            except Exception:
+                overlay.show(ERROR_MSG, rect, self.settings, self)
+                return
+            if not english:
+                overlay.show(NO_TEXT_MSG, rect, self.settings, self)
+                return
+            try:
+                ar = translate.to_arabic(english, self.engine)
+            except translate.TranslationError:
+                overlay.show(ERROR_MSG, rect, self.settings, self)
+                return
+            overlay.show(arabic.shape_for_display(ar), rect, self.settings, self)
+            self.history.add(english, ar,
+                             datetime.now().isoformat(timespec="seconds"))
+            self.history_tab.refresh()
+        finally:
+            self._busy = False

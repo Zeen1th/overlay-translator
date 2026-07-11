@@ -48,6 +48,7 @@ def select_region(parent) -> Optional[Rect]:
     canvas.bind("<ButtonRelease-1>", on_release)
     win.bind("<Escape>", on_escape)
 
+    win.wait_visibility()
     win.grab_set()
     win.focus_force()
     parent.wait_window(win)

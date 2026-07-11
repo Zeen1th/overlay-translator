@@ -26,7 +26,7 @@ class HotkeyManager:
         """Register hotkey_str, replacing any previous one. False if invalid."""
         try:
             handle = self._backend.add_hotkey(hotkey_str, self._on_trigger)
-        except (ValueError, Exception):
+        except ValueError:
             return False
         if self._handle is not None:
             self._backend.remove_hotkey(self._handle)
