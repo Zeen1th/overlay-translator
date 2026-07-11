@@ -16,7 +16,7 @@ if errorlevel 1 (
 )
 
 rem Ensure dependencies are installed; install them on first run if missing
-python -c "import deep_translator, mss, keyboard, pytesseract, PIL, arabic_reshaper, bidi, dotenv" >nul 2>nul
+python -c "import customtkinter, pystray, deep_translator, translators, requests, mss, keyboard, pytesseract, PIL" >nul 2>nul
 if errorlevel 1 (
     echo First-time setup: installing dependencies, please wait...
     python -m pip install -r requirements.txt
