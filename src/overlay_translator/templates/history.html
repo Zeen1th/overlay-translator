@@ -13,8 +13,8 @@
       <div class="hist-foot">
         <span class="ts">{{ e.timestamp }}</span>
         <span class="hist-actions">
-          <button class="btn btn-sm" hx-post="/history/copy/{{ loop.index0 }}" hx-swap="none">Copy</button>
-          <button class="btn btn-sm btn-danger" hx-post="/history/delete/{{ loop.index0 }}" hx-target="#panel">Delete</button>
+          <button class="btn btn-sm" hx-post="/history/copy/{{ e.id }}" hx-swap="none">Copy</button>
+          <button class="btn btn-sm btn-danger" hx-post="/history/delete/{{ e.id }}" hx-target="#panel">Delete</button>
         </span>
       </div>
     </div>

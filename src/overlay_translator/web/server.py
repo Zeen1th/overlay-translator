@@ -95,7 +95,7 @@ def create_app(state):
     @app.post("/history/delete/<int:i>")
     def delete_history(i):
         with state.lock:
-            state.history.delete(i)
+            state.history.delete_by_id(i)
         return _history_fragment()
 
     @app.post("/history/clear")
@@ -107,9 +107,9 @@ def create_app(state):
     @app.post("/history/copy/<int:i>")
     def copy_history(i):
         with state.lock:
-            entries = state.history.entries()
-        if 0 <= i < len(entries):
-            _clipboard_copy(entries[i].translation)
+            entry = state.history.get_by_id(i)
+        if entry is not None:
+            _clipboard_copy(entry.translation)
         return ("", 204)
 
     return app

@@ -44,7 +44,8 @@ def test_set_theme(tmp_path):
 def test_delete_and_clear_history(tmp_path):
     c, st = _ctx(tmp_path)
     st.history.add("a", "A", "t"); st.history.add("b", "B", "t")
-    c.post("/history/delete/0")
+    target_id = st.history.entries()[0].id  # "b" is newest-first
+    c.post(f"/history/delete/{target_id}")
     assert [e.source for e in st.history.entries()] == ["a"]
     c.post("/history/clear")
     assert st.history.entries() == []
@@ -55,7 +56,8 @@ def test_copy_uses_clipboard(tmp_path, monkeypatch):
     st.history.add("a", "مرحبا", "t")
     copied = {}
     monkeypatch.setattr(server_mod, "_clipboard_copy", lambda text: copied.setdefault("v", text))
-    c.post("/history/copy/0")
+    entry_id = st.history.entries()[0].id
+    c.post(f"/history/copy/{entry_id}")
     assert copied["v"] == "مرحبا"
 
 

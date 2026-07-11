@@ -33,11 +33,14 @@ def _free_port() -> int:
 
 def _spawn_select():
     """Run the selector subprocess; return a Rect or None."""
-    out = subprocess.run(
+    result = subprocess.run(
         [sys.executable, "-m", "overlay_translator.proc_select"],
         capture_output=True, text=True, creationflags=_NO_WINDOW,
         env={**os.environ, "PYTHONPATH": os.path.join(_ROOT, "src")},
-    ).stdout.strip()
+    )
+    if result.returncode != 0 and result.stderr:
+        print(f"[overlay-translator] selector failed: {result.stderr.strip()[:300]}")
+    out = (result.stdout or "").strip()
     if not out or out == "null":
         return None
     d = json.loads(out)
@@ -56,6 +59,18 @@ def _spawn_overlay(text, rect, settings):
         creationflags=_NO_WINDOW,
         env={**os.environ, "PYTHONPATH": os.path.join(_ROOT, "src")},
     )
+
+
+def _wait_for_port(port, timeout=5.0):
+    import time
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        with socket.socket() as s:
+            s.settimeout(0.25)
+            if s.connect_ex(("127.0.0.1", port)) == 0:
+                return True
+        time.sleep(0.05)
+    return False
 
 
 def run() -> None:
@@ -77,6 +92,7 @@ def run() -> None:
         target=lambda: app.run(host="127.0.0.1", port=port,
                                threaded=True, use_reloader=False),
         daemon=True).start()
+    _wait_for_port(port)
 
     def on_show():
         if state.window is not None:
