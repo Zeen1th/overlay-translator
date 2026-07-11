@@ -8,7 +8,7 @@ from .config import Config, ConfigError, load_config
 from . import capture, ocr, translate, arabic, overlay, selector
 
 NO_TEXT_MSG = "No text found"
-ERROR_MSG = "Translation failed — check your connection and DeepL key."
+ERROR_MSG = "Translation failed — check your internet connection."
 
 
 def check_tesseract() -> None:
@@ -49,7 +49,7 @@ def run() -> None:
     config = load_config(os.environ)
     ocr.configure_tesseract(config.tesseract_cmd or None)
     check_tesseract()
-    translator = translate.make_translator(config.deepl_api_key)
+    translator = translate.make_translator(config)
 
     requests: "queue.Queue[None]" = queue.Queue()
     keyboard.add_hotkey(config.hotkey, lambda: requests.put(None))
