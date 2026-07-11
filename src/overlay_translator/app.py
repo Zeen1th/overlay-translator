@@ -1,4 +1,5 @@
 import os
+import queue
 import pytesseract
 from dotenv import load_dotenv
 import keyboard
@@ -50,9 +51,23 @@ def run() -> None:
     check_tesseract()
     translator = translate.make_translator(config.deepl_api_key)
 
-    keyboard.add_hotkey(
-        config.hotkey, lambda: translate_selection(config, translator)
-    )
+    requests: "queue.Queue[None]" = queue.Queue()
+    keyboard.add_hotkey(config.hotkey, lambda: requests.put(None))
     print(f"OverlayTranslator ready. Press {config.hotkey} to translate. "
           f"Ctrl+C to quit.")
-    keyboard.wait()
+
+    while True:
+        try:
+            # Poll with a timeout so Ctrl+C (KeyboardInterrupt) can break the
+            # loop on Windows, where a blocking get() is not interruptible.
+            requests.get(timeout=0.5)
+        except queue.Empty:
+            continue
+        # Coalesce any extra presses queued while we were busy, so a burst of
+        # Alt+Q presses triggers the pipeline once, not many times.
+        while not requests.empty():
+            try:
+                requests.get_nowait()
+            except queue.Empty:
+                break
+        translate_selection(config, translator)

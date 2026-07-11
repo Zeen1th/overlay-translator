@@ -15,7 +15,8 @@ translation appear just above it. Local OCR (Tesseract) + DeepL API.
 ## Usage
 
 - **Alt+Q** — start a selection; drag a box over English text.
-- **Esc / click** — dismiss the translation bubble.
+- **Esc** or **click the bubble** — dismiss the translation.
+- While a translation bubble is showing, Alt+Q is paused until you dismiss it.
 - **Ctrl+C** in the console — quit.
 
 ## Config (.env)
