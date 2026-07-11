@@ -7,7 +7,6 @@ class Settings:
     hotkey: str = "alt+q"
     auto_hide_seconds: int = 5
     engine: str = "google"
-    deepl_api_key: str = ""
     font_size: int = 18
     theme: str = "dark"
 
