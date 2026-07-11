@@ -5,17 +5,15 @@ def test_empty_returns_empty():
     assert shape_for_display("") == ""
 
 
-def test_shaping_returns_reordered_string():
-    src = "مرحبا"
-    out = shape_for_display(src)
-    # Output is a non-empty string, reordered for visual RTL display,
-    # so it differs from the raw logical-order input.
-    assert isinstance(out, str)
-    assert out != ""
-    assert out != src
+def test_arabic_passthrough_unchanged():
+    # Windows Tk shapes and bidi-orders Arabic itself; pre-processing it with
+    # arabic_reshaper + python-bidi double-processes and reverses the text, so
+    # shape_for_display must hand the raw logical text through untouched.
+    src = "مرحبا بالعالم كيف حالك"
+    assert shape_for_display(src) == src
 
 
-def test_shaping_preserves_ascii_passthrough():
-    # Plain ASCII has nothing to reshape; characters are preserved.
-    out = shape_for_display("abc")
-    assert set(out) == set("abc")
+def test_mixed_content_passthrough_unchanged():
+    # The real-world failure case: Arabic mixed with quotes/Latin/punctuation.
+    src = 'مرحبا "world" - أحمد'
+    assert shape_for_display(src) == src
