@@ -1,0 +1,14 @@
+<section class="panel-in">
+  <div class="card status-card">
+    <div class="status-title">Ready</div>
+    <div class="status-sub">Press <kbd>{{ s.hotkey }}</kbd> and drag over English text</div>
+    <div class="chips">
+      <span class="chip">engine: {{ s.engine }}</span>
+      <span class="chip">hotkey: {{ s.hotkey }}</span>
+    </div>
+    <button class="btn btn-accent" hx-post="/translate" hx-target="#panel" hx-swap="innerHTML">Translate now</button>
+  </div>
+  {% if not tesseract_ok %}
+  <div class="card warn">⚠ Tesseract not found — install it (<code>winget install UB-Mannheim.TesseractOCR</code>) and restart.</div>
+  {% endif %}
+</section>

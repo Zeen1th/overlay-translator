@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en" data-theme="{{ s.theme }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OverlayTranslator</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/htmx.min.js"></script>
+</head>
+<body>
+  <div class="app">
+    <nav class="nav">
+      <div class="brand">Overlay<span>Translator</span></div>
+      <a class="nav-item active" hx-get="/home" hx-target="#panel" hx-on:click="setActive(this)">Home</a>
+      <a class="nav-item" hx-get="/history" hx-target="#panel" hx-on:click="setActive(this)">History</a>
+      <a class="nav-item" hx-get="/settings" hx-target="#panel" hx-on:click="setActive(this)">Settings</a>
+    </nav>
+    <main id="panel" hx-get="/home" hx-trigger="load"></main>
+  </div>
+  <script>
+    function setActive(el){
+      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+      el.classList.add('active');
+    }
+  </script>
+</body>
+</html>
