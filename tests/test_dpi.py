@@ -1,5 +1,5 @@
 import ctypes
-from overlay_translator.app import enable_dpi_awareness
+from overlay_translator.dpi import enable_dpi_awareness
 
 
 class FakeUser32:

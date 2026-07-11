@@ -41,3 +41,23 @@ def test_corrupt_file_starts_empty(tmp_path):
     p = tmp_path / "h.json"
     p.write_text("not json", encoding="utf-8")
     assert HistoryStore(str(p)).entries() == []
+
+
+def test_ids_are_unique_and_nonzero(tmp_path):
+    store = HistoryStore(str(tmp_path / "h.json"))
+    for i in range(5):
+        store.add(f"s{i}", f"t{i}", "2026-07-11T10:00:00")
+    ids = [e.id for e in store.entries()]
+    assert all(i != 0 for i in ids)
+    assert len(set(ids)) == len(ids)
+
+
+def test_delete_by_id_removes_targeted_entry(tmp_path):
+    store = HistoryStore(str(tmp_path / "h.json"))
+    store.add("a", "A", "t")
+    store.add("b", "B", "t")   # entries: [b, a]
+    target = store.entries()[1]  # "a"
+    assert store.get_by_id(target.id) == target
+    store.delete_by_id(target.id)
+    assert [e.source for e in store.entries()] == ["b"]
+    assert store.get_by_id(target.id) is None

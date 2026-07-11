@@ -1,0 +1,23 @@
+<section class="panel-in" hx-get="/history" hx-trigger="every 2s" hx-target="#panel" hx-swap="innerHTML">
+  <div class="row-between">
+    <h2>History</h2>
+    <button class="btn btn-ghost" hx-post="/history/clear" hx-target="#panel">Clear all</button>
+  </div>
+  {% if not entries %}
+    <div class="card muted-card">No translations yet.</div>
+  {% else %}
+    {% for e in entries %}
+    <div class="card hist">
+      <div class="hist-src">{{ e.source }}</div>
+      <div class="hist-ar" dir="rtl">{{ e.translation }}</div>
+      <div class="hist-foot">
+        <span class="ts">{{ e.timestamp }}</span>
+        <span class="hist-actions">
+          <button class="btn btn-sm" hx-post="/history/copy/{{ e.id }}" hx-swap="none">Copy</button>
+          <button class="btn btn-sm btn-danger" hx-post="/history/delete/{{ e.id }}" hx-target="#panel">Delete</button>
+        </span>
+      </div>
+    </div>
+    {% endfor %}
+  {% endif %}
+</section>
