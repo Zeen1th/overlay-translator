@@ -55,11 +55,16 @@ class AppWindow(ctk.CTk):
     def _poll(self):
         try:
             while True:
-                msg = self._queue.get_nowait()
-                self._handle(msg)
-        except queue.Empty:
-            pass
-        self.after(50, self._poll)
+                try:
+                    msg = self._queue.get_nowait()
+                except queue.Empty:
+                    break
+                try:
+                    self._handle(msg)
+                except Exception as exc:  # never let one bad message kill the loop
+                    print(f"[overlay-translator] error handling {msg!r}: {exc}")
+        finally:
+            self.after(50, self._poll)
 
     def _handle(self, msg):
         kind = msg[0]
@@ -86,10 +91,8 @@ class AppWindow(ctk.CTk):
         self.focus_force()
 
     def _quit_app(self):
-        try:
-            self.hotkey_manager  # unhook happens on process exit
-        finally:
-            self.destroy()
+        # The keyboard hotkey is unhooked automatically on process exit.
+        self.destroy()
 
     # ---- settings -------------------------------------------------------
     def save_settings(self):
