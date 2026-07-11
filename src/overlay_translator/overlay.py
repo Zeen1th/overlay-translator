@@ -1,25 +1,27 @@
 import tkinter as tk
 from .models import Rect
-from .config import Config
 
 MARGIN = 8
+BUBBLE_BG = "#1e1e1e"
+BUBBLE_FG = "#ffffff"
+BORDER = "#4a4a4a"
 
 
-def show(text: str, rect: Rect, config: Config) -> None:
+def show(text: str, rect: Rect, settings, parent) -> None:
     """Show a dismissible Arabic bubble just above the selected region."""
-    win = tk.Tk()
+    win = tk.Toplevel(parent)
     win.overrideredirect(True)
     win.attributes("-topmost", True)
-    win.configure(bg=config.bubble_fg)  # thin border effect
+    win.configure(bg=BORDER)  # 1px border effect via padding
 
     label = tk.Label(
         win,
         text=text,
         justify="right",
         anchor="e",
-        bg=config.bubble_bg,
-        fg=config.bubble_fg,
-        font=(config.font_family, config.font_size),
+        bg=BUBBLE_BG,
+        fg=BUBBLE_FG,
+        font=("Segoe UI", settings.font_size),
         wraplength=max(rect.width, 300),
         padx=12,
         pady=8,
@@ -35,7 +37,15 @@ def show(text: str, rect: Rect, config: Config) -> None:
         y = rect.y + rect.height + MARGIN
     win.geometry(f"+{x}+{y}")
 
-    win.bind("<Escape>", lambda _e: win.destroy())
-    win.bind("<Button-1>", lambda _e: win.destroy())
+    def dismiss(_event=None):
+        if win.winfo_exists():
+            win.destroy()
+
+    win.bind("<Escape>", dismiss)
+    win.bind("<Button-1>", dismiss)
+    label.bind("<Button-1>", dismiss)
     win.focus_force()
-    win.mainloop()
+
+    seconds = settings.auto_hide_seconds
+    if seconds and seconds > 0:
+        win.after(int(seconds * 1000), dismiss)
