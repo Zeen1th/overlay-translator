@@ -15,6 +15,7 @@ def test_appstate_builds_engine_and_lock(tmp_path):
     st = _state(tmp_path)
     assert isinstance(st.engine, translate.GoogleEngine)
     assert isinstance(st.lock, type(threading.Lock()))
+    assert isinstance(st.cycle_lock, type(threading.Lock()))
 
 
 def test_appstate_rebuild_engine_after_change(tmp_path):
