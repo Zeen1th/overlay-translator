@@ -1,12 +1,27 @@
 <section class="panel-in">
   <div class="card status-card">
     <div class="status-title">Ready</div>
-    <div class="status-sub">Press <kbd>{{ s.hotkey }}</kbd> and drag over English text</div>
+    <div class="status-sub">
+      Press <kbd>{{ s.hotkey }}</kbd>
+      {% if s.use_saved_region and s.ocr_region %}
+        to translate from your saved OCR region
+      {% else %}
+        and drag over English text
+      {% endif %}
+    </div>
     <div class="chips">
       <span class="chip">engine: {{ s.engine }}</span>
       <span class="chip">hotkey: {{ s.hotkey }}</span>
+      <span class="chip">region key: {{ s.region_hotkey }}</span>
+      <span class="chip">auto key: {{ s.auto_toggle_hotkey }}</span>
+      <span class="chip">ocr mode: {{ 'saved region' if s.use_saved_region else 'drag select' }}</span>
+      <span class="chip">auto: {{ 'on' if s.auto_translate_enabled else 'off' }}</span>
     </div>
-    <button class="btn btn-accent" hx-post="/translate" hx-target="#panel" hx-swap="innerHTML">Translate now</button>
+    <div class="row">
+      <button class="btn btn-accent" hx-post="/translate" hx-target="#panel" hx-swap="innerHTML">Translate now</button>
+      <button class="btn" hx-post="/auto/start" hx-target="#panel" hx-swap="innerHTML" {{ 'disabled' if not s.ocr_region else '' }}>Start auto</button>
+      <button class="btn" hx-post="/auto/stop" hx-target="#panel" hx-swap="innerHTML">Stop auto</button>
+    </div>
   </div>
   {% if not tesseract_ok %}
   <div class="card warn">⚠ Tesseract not found — install it (<code>winget install UB-Mannheim.TesseractOCR</code>) and restart.</div>

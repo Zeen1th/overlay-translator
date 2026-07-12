@@ -2,11 +2,59 @@
   <h2>Settings</h2>
 
   <div class="card">
-    <label class="lbl">Hotkey</label>
+    <label class="lbl">Translate hotkey</label>
     <div class="row">
       <kbd>{{ s.hotkey }}</kbd>
-      <button class="btn" hx-post="/settings/hotkey/record" hx-target="#panel">Record shortcut</button>
+      <button class="btn" hx-post="/settings/hotkey/record" hx-vals='{"kind":"translate"}' hx-target="#panel">Record shortcut</button>
     </div>
+  </div>
+
+  <div class="card">
+    <label class="lbl">OCR region hotkey</label>
+    <div class="row">
+      <kbd>{{ s.region_hotkey }}</kbd>
+      <button class="btn" hx-post="/settings/hotkey/record" hx-vals='{"kind":"region"}' hx-target="#panel">Record region shortcut</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <label class="lbl">Auto-translate toggle hotkey</label>
+    <div class="row">
+      <kbd>{{ s.auto_toggle_hotkey }}</kbd>
+      <button class="btn" hx-post="/settings/hotkey/record" hx-vals='{"kind":"auto"}' hx-target="#panel">Record auto toggle shortcut</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <label class="lbl">OCR Region</label>
+    {% if s.ocr_region %}
+      <div class="hint">Saved region: x={{ s.ocr_region.x }}, y={{ s.ocr_region.y }}, w={{ s.ocr_region.width }}, h={{ s.ocr_region.height }}</div>
+    {% else %}
+      <div class="hint">No saved region</div>
+    {% endif %}
+    <div class="row">
+      <button class="btn" hx-post="/settings/ocr-region/set" hx-target="#panel">Set region</button>
+      <button class="btn" hx-post="/settings/ocr-region/clear" hx-target="#panel" {{ 'disabled' if not s.ocr_region else '' }}>Clear region</button>
+    </div>
+    <div class="row">
+      <button class="btn" hx-post="/settings/ocr-region/use-saved" hx-vals='{"enabled":"1"}' hx-target="#panel" {{ 'disabled' if not s.ocr_region else '' }}>Use saved region</button>
+      <button class="btn" hx-post="/settings/ocr-region/use-saved" hx-vals='{"enabled":"0"}' hx-target="#panel" {{ 'disabled' if not s.ocr_region else '' }}>Use drag select</button>
+    </div>
+    <div class="hint">Current mode: {{ 'saved region' if s.use_saved_region else 'drag select' }}</div>
+    <div class="row">
+      <button class="btn" hx-post="/settings/auto/start" hx-target="#panel" {{ 'disabled' if not s.ocr_region else '' }}>Start auto translate</button>
+      <button class="btn" hx-post="/settings/auto/stop" hx-target="#panel">Stop auto translate</button>
+    </div>
+    <div class="hint">Auto translation: {{ 'on' if s.auto_translate_enabled else 'off' }}</div>
+  </div>
+
+  <div class="card">
+    <label class="lbl">Start with Windows</label>
+    <div class="row">
+      <button class="btn" hx-post="/settings/startup" hx-vals='{"enabled":"1"}' hx-target="#panel">Enable</button>
+      <button class="btn" hx-post="/settings/startup" hx-vals='{"enabled":"0"}' hx-target="#panel">Disable</button>
+    </div>
+    <div class="hint">Current: {{ 'enabled' if s.start_with_windows else 'disabled' }}</div>
   </div>
 
   <div class="card">

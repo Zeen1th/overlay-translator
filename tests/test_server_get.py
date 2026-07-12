@@ -22,6 +22,7 @@ def test_home_shows_hotkey_and_engine(tmp_path):
     body = app.test_client().get("/home").get_data(as_text=True)
     assert "alt+q" in body
     assert "bing" in body
+    assert "Start auto" in body
 
 
 def test_history_lists_entries(tmp_path):
@@ -39,7 +40,10 @@ def test_history_empty_message(tmp_path):
 
 
 def test_settings_shows_current_values(tmp_path):
-    app, st = _client(tmp_path, engine="deepl", font_size=22)
+    app, st = _client(tmp_path, engine="deepl", font_size=22,
+                      region_hotkey="alt+w", auto_toggle_hotkey="alt+e")
     body = app.test_client().get("/settings").get_data(as_text=True)
     assert "deepl" in body
     assert "22" in body
+    assert "OCR Region" in body
+    assert "Start with Windows" in body

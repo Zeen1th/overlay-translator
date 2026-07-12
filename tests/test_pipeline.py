@@ -70,3 +70,19 @@ def test_success_shows_bubble_and_records_history(tmp_path):
     assert shown == ["مرحبا"]              # shape_for_display is passthrough
     e = st.history.entries()[0]
     assert (e.source, e.translation, e.timestamp) == ("Hello", "مرحبا", "2026-07-11T10:00:00")
+
+
+def test_run_cycle_for_rect_skips_same_source(tmp_path):
+    st = _state(tmp_path, _Eng(out="مرحبا"))
+    shown = []
+    result = pipeline.run_cycle_for_rect(
+        st,
+        Rect(0, 0, 10, 10),
+        overlay_fn=lambda text, rect, settings: shown.append(text),
+        capture_fn=lambda r: "img",
+        ocr_fn=lambda i: "Hello",
+        skip_if_source_equals="Hello",
+    )
+    assert result == "Hello"
+    assert shown == []
+    assert st.history.entries() == []

@@ -85,10 +85,86 @@ def create_app(state):
     @app.post("/settings/hotkey/record")
     def record_hotkey():
         import keyboard
+        kind = request.form.get("kind", "translate")
         combo = keyboard.read_hotkey(suppress=False)
-        state.settings.hotkey = combo
-        if state.hotkey_manager is not None:
-            state.hotkey_manager.register(combo)
+        if kind == "translate":
+            ok = True if state.hotkey_manager is None else state.hotkey_manager.register(combo)
+            if ok:
+                state.settings.hotkey = combo
+        elif kind == "region":
+            ok = True if state.region_hotkey_manager is None else state.region_hotkey_manager.register(combo)
+            if ok:
+                state.settings.region_hotkey = combo
+        elif kind == "auto":
+            ok = True if state.auto_hotkey_manager is None else state.auto_hotkey_manager.register(combo)
+            if ok:
+                state.settings.auto_toggle_hotkey = combo
+        state.save()
+        return _settings_fragment()
+
+    @app.post("/settings/ocr-region/set")
+    def set_ocr_region():
+        if state.capture_region is not None:
+            state.capture_region()
+        return _settings_fragment()
+
+    @app.post("/settings/ocr-region/clear")
+    def clear_ocr_region():
+        state.settings.ocr_region = None
+        state.settings.use_saved_region = False
+        state.settings.auto_translate_enabled = False
+        if state.stop_auto is not None:
+            state.stop_auto()
+        state.save()
+        return _settings_fragment()
+
+    @app.post("/settings/ocr-region/use-saved")
+    def use_saved_region():
+        state.settings.use_saved_region = (
+            request.form["enabled"] == "1" and bool(state.settings.ocr_region)
+        )
+        if not state.settings.use_saved_region:
+            state.settings.auto_translate_enabled = False
+            if state.stop_auto is not None:
+                state.stop_auto()
+        state.save()
+        return _settings_fragment()
+
+    @app.post("/auto/start")
+    def auto_start():
+        if state.start_auto is not None:
+            state.start_auto()
+        return _home_fragment()
+
+    @app.post("/auto/stop")
+    def auto_stop():
+        if state.stop_auto is not None:
+            state.stop_auto()
+        return _home_fragment()
+
+    @app.post("/auto/toggle")
+    def auto_toggle():
+        if state.toggle_auto is not None:
+            state.toggle_auto()
+        return _home_fragment()
+
+    @app.post("/settings/auto/start")
+    def settings_auto_start():
+        if state.start_auto is not None:
+            state.start_auto()
+        return _settings_fragment()
+
+    @app.post("/settings/auto/stop")
+    def settings_auto_stop():
+        if state.stop_auto is not None:
+            state.stop_auto()
+        return _settings_fragment()
+
+    @app.post("/settings/startup")
+    def set_startup():
+        enabled = request.form["enabled"] == "1"
+        from ..startup import set_startup_enabled
+        state.settings.start_with_windows = set_startup_enabled(enabled, state.repo_root)
         state.save()
         return _settings_fragment()
 

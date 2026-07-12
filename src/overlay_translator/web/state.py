@@ -1,3 +1,4 @@
+import os
 import threading
 
 import pytesseract
@@ -14,9 +15,17 @@ class AppState:
         self.settings_path = settings_path
         self.history = history
         self.lock = threading.Lock()
+        self.cycle_lock = threading.Lock()
         self.hotkey_manager = None
+        self.region_hotkey_manager = None
+        self.auto_hotkey_manager = None
+        self.repo_root = os.getcwd()
         self.window = None          # pywebview window, set by the host
         self.translate_now = None   # callable set by the host to run one cycle
+        self.capture_region = None  # callable set by host to select + save region
+        self.start_auto = None      # callable set by host to enable auto mode
+        self.stop_auto = None       # callable set by host to disable auto mode
+        self.toggle_auto = None     # callable set by host to toggle auto mode
         self.engine = translate.make_engine(settings.engine)
         self.tesseract_ok = self._check_tesseract()
 
